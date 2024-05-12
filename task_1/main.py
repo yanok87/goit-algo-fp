@@ -68,6 +68,7 @@ class LinkedList:
         return sorted_list
 
     def merge_sorted_lists(self, list2):
+        """Merging of the list with another Linked List"""
         dummy = Node(0)
         current = dummy
         list1 = self.head
