@@ -4,44 +4,51 @@ import turtle
 import math
 
 
-def pyth_tree(jim, depth, maxdepth):
-    """Funciton that calculates the Pythagorean Tree recursevely"""
-    if depth > maxdepth:
+def draw_pythagorean_tree(t, length, depth):
+    """
+    Draws a Pythagorean tree with given length and depth.
+
+    Args:
+        t: The turtle object to use for drawing.
+        length: The length of the current branch.
+        depth: The remaining depth of the recursion.
+    """
+    if depth == 0:
         return
-    length = 180 * ((math.sqrt(2) / 2) ** depth)
-    bill = jim.clone()
-    jim.forward(length)
-    jim.left(45)
-    pyth_tree(jim, depth + 1, maxdepth)
-    bill.right(90)
-    bill.forward(length)
-    bill.left(90)
-    bill.forward(length)
-    if depth != maxdepth:
-        turt3 = bill.clone()
-        turt3.left(45)
-        turt3.forward(180 * ((math.sqrt(2) / 2) ** (1 + depth)))
-        turt3.right(90)
-        pyth_tree(turt3, depth + 1, maxdepth)
-    bill.left(45)
-    bill.forward(length)
+    t.forward(length)
+    t.left(45)
+    draw_pythagorean_tree(t, length * (1 / math.sqrt(2)), depth - 1)
+    t.right(90)
+    draw_pythagorean_tree(t, length * (1 / math.sqrt(2)), depth - 1)
+    t.left(45)
+    t.backward(length)
 
 
-n = int(input("Recursion level:"))
+def main():
+    """
+    Gets user input for recursion level, sets up the turtle,
+    and calls the drawing function.
+    """
+    while True:
+        try:
+            depth = int(input("Enter desired recursion level (positive integer): "))
+            if depth <= 0:
+                print("Please enter a positive integer.")
+            else:
+                break
+        except ValueError:
+            print("Please enter a valid integer.")
 
-
-def draw_tree(n):
-    """Function that draws the Pythagorean Tree"""
+    t = turtle.Turtle()
+    t.speed(10)  # Set turtle speed to fastest
+    t.left(90)
+    t.penup()
+    t.goto(0, -100)
+    t.pendown()
+    draw_pythagorean_tree(t, 150, depth)  # You can adjust initial length here
     window = turtle.Screen()
-    turt = turtle.Turtle()
-
-    turt.penup()
-    turt.goto(-75, -225)
-    turt.pendown()
-    turt.speed(5)
-    turt.left(90)
-    pyth_tree(turt, 1, n)
     window.exitonclick()
 
 
-draw_tree(n)
+if __name__ == "__main__":
+    main()
