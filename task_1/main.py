@@ -67,7 +67,6 @@ class LinkedList:
 
         return sorted_list
 
-    def merge_sorted_lists(self, list2):
         """Merging of the list with another Linked List"""
         dummy = Node(0)
         current = dummy
@@ -101,6 +100,7 @@ list1 = LinkedList()
 list1.insert(5)
 list1.insert(1)
 list1.insert(15)
+list1.insertion_sort()
 print("List1:")
 list1.print_list()
 
@@ -108,14 +108,54 @@ list2 = LinkedList()
 list2.insert(12)
 list2.insert(4)
 list2.insert(16)
+list2.insertion_sort()
 print("List2:")
 list2.print_list()
 
-list1.merge_sorted_lists(list2)
 
-print("Merged and Sorted List:")
-list1.print_list()
+def merge_sorted(l1, l2):
+    """Merge two sorted linked lists"""
+    # If one of the lists is empty, return the other list
+    if not l1:
+        return l2
+    if not l2:
+        return l1
 
-list1.reverse()
-print("Reversed, Sorted, Merged list:")
-list1.print_list()
+    # Initialize merged list
+    merged = LinkedList()
+
+    # Set pointers to the heads of both lists
+    current1 = l1.head
+    current2 = l2.head
+
+    # Traverse both lists and merge elements
+    while current1 and current2:
+        if current1.data < current2.data:
+            merged.insert(current1.data)
+            current1 = current1.next
+        else:
+            merged.insert(current2.data)
+            current2 = current2.next
+
+    # If any list has remaining elements, append them to the merged list
+    while current1:
+        merged.insert(current1.data)
+        current1 = current1.next
+    while current2:
+        merged.insert(current2.data)
+        current2 = current2.next
+
+    # Reverse the merged list to get the correct order
+    merged.reverse()
+
+    return merged
+
+
+# Example usage:
+merged_list = merge_sorted(list1, list2)
+
+# Print the merged list
+current = merged_list.head
+while current:
+    print(current.data, end=" ")
+    current = current.next
