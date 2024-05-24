@@ -1,21 +1,18 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-from collections import deque
-import time
-import random
+import matplotlib.animation as animation
 
 
 class Node:
-    def __init__(self, key, color="skyblue"):
+    def __init__(self, key):
         self.left = None
         self.right = None
         self.val = key
-        self.color = color  # Additional argument to store the color of the node
 
 
 def add_edges(graph, node, pos, x=0, y=0, layer=1):
     if node is not None:
-        graph.add_node(node.val, color=node.color)  # Saving a node color in a graph
+        graph.add_node(node.val)
         if node.left:
             graph.add_edge(node.val, node.left.val)
             l = x - 1 / 2**layer
@@ -29,132 +26,70 @@ def add_edges(graph, node, pos, x=0, y=0, layer=1):
     return graph
 
 
-def draw_tree(tree_root, traversal):
+def depth_first_traversal(node):
+    if node is not None:
+        yield node
+        yield from depth_first_traversal(node.left)
+        yield from depth_first_traversal(node.right)
+
+
+def breadth_first_traversal(node):
+    if node is None:
+        return
+    queue = [node]
+    while queue:
+        current_node = queue.pop(0)
+        yield current_node
+        if current_node.left:
+            queue.append(current_node.left)
+        if current_node.right:
+            queue.append(current_node.right)
+
+
+def animate_traversal(traversal, tree_root):
     tree = nx.DiGraph()
     pos = {(tree_root.val): (0, 0)}
     tree = add_edges(tree, tree_root, pos)
 
-    plt.figure(figsize=(8, 5))
+    colors = ["#1296F0"] * len(tree.nodes())
 
-    # Draw initial tree with random colors
-    node_colors = [tree.nodes[node]["color"] for node in tree.nodes()]
-    nx.draw(
-        tree,
-        pos=pos,
-        with_labels=True,
-        arrows=False,
-        node_size=2500,
-        node_color=node_colors,
-    )
-    plt.show()
+    fig, ax = plt.subplots(figsize=(8, 5))
 
-    # Traverse the tree, updating node colors for each step
-    for step, (node, color) in enumerate(traversal, start=1):
-        tree.nodes[node.val]["color"] = color
-        node_colors = [tree.nodes[node]["color"] for node in tree.nodes()]
-        plt.figure(figsize=(8, 5))
+    def update(frame):
+        if frame < len(colors):
+            colors[frame] = "#FF5733"
+        else:
+            colors[frame - len(colors)] = "#FFFFFF"
+        ax.clear()
         nx.draw(
             tree,
             pos=pos,
             with_labels=True,
             arrows=False,
             node_size=2500,
-            node_color=node_colors,
+            node_color=colors,
+            ax=ax,
         )
-        plt.title(f"Step {step}")
-        plt.show()
-        time.sleep(1)
 
-
-def in_order_traversal(root):
-    traversal = []
-
-    def _in_order_traversal(node):
-        if node:
-            _in_order_traversal(node.left)
-            node.color = generate_color()
-            traversal.append((node, node.color))
-            _in_order_traversal(node.right)
-
-    _in_order_traversal(root)
-    return traversal
-
-
-def pre_order_traversal(root):
-    traversal = []
-
-    def _pre_order_traversal(node):
-        if node:
-            node.color = generate_color()
-            traversal.append((node, node.color))
-            _pre_order_traversal(node.left)
-            _pre_order_traversal(node.right)
-
-    _pre_order_traversal(root)
-    return traversal
-
-
-def post_order_traversal(root):
-    traversal = []
-
-    def _post_order_traversal(node):
-        if node:
-            _post_order_traversal(node.left)
-            _post_order_traversal(node.right)
-            node.color = generate_color()
-            traversal.append((node, node.color))
-
-    _post_order_traversal(root)
-    return traversal
-
-
-def breadth_first_traversal(root):
-    traversal = []
-    if root is None:
-        return traversal
-    queue = deque([(root, 1)])
-    while queue:
-        node, depth = queue.popleft()
-        node.color = generate_color()
-        traversal.append((node, node.color))
-        if node.left:
-            queue.append((node.left, depth + 1))
-        if node.right:
-            queue.append((node.right, depth + 1))
-    return traversal
-
-
-def generate_color():
-    """Generate random RGB color code"""
-    r = random.randint(0, 255)
-    g = random.randint(0, 255)
-    b = random.randint(0, 255)
-    return "#{:02X}{:02X}{:02X}".format(r, g, b)
+    ani = animation.FuncAnimation(
+        fig, update, frames=len(tree.nodes()) * 2, interval=1000
+    )
+    plt.show()
 
 
 # Creating the tree
-root = Node(0, color=generate_color())
-root.left = Node(4, color=generate_color())
-root.left.left = Node(5, color=generate_color())
-root.left.right = Node(10, color=generate_color())
-root.right = Node(1, color=generate_color())
-root.right.left = Node(3, color=generate_color())
+root = Node(0)
+root.left = Node(4)
+root.left.left = Node(5)
+root.left.right = Node(10)
+root.right = Node(1)
+root.right.left = Node(3)
 
-# Perform different traversals
-in_order_traversal_result = in_order_traversal(root)
-pre_order_traversal_result = pre_order_traversal(root)
-post_order_traversal_result = post_order_traversal(root)
-breadth_first_traversal_result = breadth_first_traversal(root)
+# Depth-first traversal
+# traversal = depth_first_traversal(root)
 
-# Displaying the tree with different traversals
-print("In-order traversal:")
-draw_tree(root, in_order_traversal_result)
+# Breadth-first traversal
+traversal = breadth_first_traversal(root)
 
-print("Pre-order traversal:")
-draw_tree(root, pre_order_traversal_result)
-
-print("Post-order traversal:")
-draw_tree(root, post_order_traversal_result)
-
-print("Breadth-first traversal:")
-draw_tree(root, breadth_first_traversal_result)
+# Animating the traversal
+animate_traversal(traversal, root)
