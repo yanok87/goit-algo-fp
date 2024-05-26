@@ -1,19 +1,39 @@
+"""Module that visualizes tree traversals in-depth and breadth-first"""
+
+from collections import deque
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
-from collections import deque
-
-
 class Node:
     def __init__(self, key):
+        """
+        Initializes a new instance of the Node class.
+
+        Args:
+            key: The value of the node.
+        """
         self.left = None
         self.right = None
         self.val = key
 
 
 def add_edges(graph, node, pos, x=0, y=0, layer=1):
+    """
+    Recursively adds edges to a graph representing the tree.
+
+    Args:
+        graph: The graph object to which the edges will be added.
+        node: The current node.
+        pos: A dictionary storing the positions of nodes.
+        x: X-coordinate of the current node.
+        y: Y-coordinate of the current node.
+        layer: The current layer of the tree.
+
+    Returns:
+        The updated graph.
+    """
     if node is not None:
         graph.add_node(node.val)
         if node.left:
@@ -30,6 +50,15 @@ def add_edges(graph, node, pos, x=0, y=0, layer=1):
 
 
 def breadth_first_traversal(root):
+    """
+    Performs breadth-first traversal of a binary tree.
+
+    Args:
+        root: The root node of the binary tree.
+
+    Returns:
+        A generator yielding the nodes visited in the traversal.
+    """
     if root is None:
         return []
 
@@ -49,6 +78,15 @@ def breadth_first_traversal(root):
 
 
 def depth_first_traversal(root):
+    """
+    Performs depth-first traversal of a binary tree.
+
+    Args:
+        root: The root node of the binary tree.
+
+    Returns:
+        A generator yielding the nodes visited in the traversal.
+    """
     if root is None:
         return
 
@@ -63,11 +101,19 @@ def depth_first_traversal(root):
             stack.append(current_node.right)
         if current_node.left:
             stack.append(current_node.left)
+
     print("result:", result)
     return result
 
 
-def animate_traversal(traversal, tree_root, traversal_type):
+def animate_traversal(traversal, tree_root):
+    """
+    Animates the traversal of a binary tree.
+
+    Args:
+        traversal: A function representing the traversal algorithm (e.g., breadth_first_traversal).
+        tree_root: The root node of the binary tree to be traversed and visualized.
+    """
     tree = nx.DiGraph()
     pos = {(tree_root.val): (0, 0)}
     tree = add_edges(tree, tree_root, pos)
@@ -77,7 +123,6 @@ def animate_traversal(traversal, tree_root, traversal_type):
     fig, ax = plt.subplots(figsize=(8, 5))
 
     def update(frame):
-        print("frame:", frame)
         if frame < len(colors):
             colors[frame] = "#FF5733"
         else:
@@ -97,7 +142,7 @@ def animate_traversal(traversal, tree_root, traversal_type):
     frames = traversal(tree_root)
 
     ani = animation.FuncAnimation(
-        fig, update, frames=frames, interval=1000, repeat=False
+        fig, update, frames=len(list(frames)), interval=1000, repeat=False
     )
     plt.show()
 
@@ -112,19 +157,11 @@ root.left.right = Node(4)
 root.right.left = Node(5)
 root.right.right = Node(6)
 
-# Performing breadth-first traversal
-print("Breadth-First Traversal:")
-breadth_first_traversal(root)
-
-# Performing depth-first traversal
-print("\nDepth-First Traversal:")
-depth_first_traversal(root)
-
 
 # Animating the breadth-first traversal
-# print("Animating Breadth-First Traversal...")
-# animate_traversal(breadth_first_traversal, root, "breadth-first")
+print("Animating Breadth-First Traversal...")
+animate_traversal(breadth_first_traversal, root)
 
 # Animating the depth-first traversal
-print("Animating Depth-First Traversal...")
-animate_traversal(depth_first_traversal, root, "depth-first")
+# print("Animating Depth-First Traversal...")
+# animate_traversal(depth_first_traversal, root)
